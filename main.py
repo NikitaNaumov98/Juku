@@ -34,6 +34,7 @@ while True:
         inputbuff = inputbuff.rstrip("\n")
         print(printbuff)
     if userc == "stop":
+        ser.write("sd:0:0:0\n")
         ser.close()
         break
     communication(userc)
