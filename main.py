@@ -10,6 +10,7 @@ def communication(userc):
         spdlist = userc.split(":")
         if len(spdlist) == 4:
             ser.write("sd:" + spdlist[1] + ":" + spdlist[2] + ":" + spdlist[3] + "\n")
+            print(ser.readline().rstrip("\n"))
     elif userc.startswith("d:"):
         spdlist = userc.split(":")
         if len(spdlist) == 2:
@@ -35,6 +36,7 @@ while True:
         print(printbuff)
     if userc == "stop":
         ser.write("sd:0:0:0\n")
+        print(ser.readline().rstrip("\n"))
         ser.close()
         break
     communication(userc)
