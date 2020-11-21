@@ -2,33 +2,39 @@ import threading
 import serial
 
 def communication(userc):
-	global speedthread
+	global speedthread, spdlist, comm
 	if userc == "gs":
-		ser.write((userc + "\n").encode('UTF-8'))
-		answer = ser.readline()
-		print(answer.decode('UTF-8').rstrip("\n"))
+		comm = []
+		comm.append(userc)
+		speedthread = threading.Thread(target=setspeed, args=(spdlist, comm))
+		speedthread.start()
 	elif userc.startswith("sd:"):
-		spdlist = userc.split(":")
-		if len(spdlist) == 4:
-			speedthread = threading.Thread(target=setspeed, args=(spdlist,))
+		newspdlist = userc.split(":")
+		if len(newspdlist) == 4:
+			spdlist = newspdlist
+			speedthread = threading.Thread(target=setspeed, args=(spdlist, comm))
 			speedthread.start()
-	elif userc.startswith("d:"):
-		spdlist = userc.split(":")
-		if len(spdlist) == 2:
-			ser.write(("d:" + spdlist[1] + "\n").encode('UTF-8'))
-	elif userc.startswith("sv:"):
-		poslist = userc.split(":")
-		if len(poslist) == 2:
-			ser.write(("sv:" + poslist[1] + "\n").encode('UTF-8'))
-	elif userc.startswith("rf:"):
-		rflist = userc.split(":")
-		if len(rflist) == 2:
-			ser.write((rflist[1] + "\n").encode('UTF-8'))
+	elif userc.startswith("d:") or userc.startswith("sv:") or userc.startswith("rf:"):
+		newcomm = userc.split(":")
+		if len(newcomm) == 2:
+			comm = newcomm
+			speedthread = threading.Thread(target=setspeed, args=(spdlist, comm))
+			speedthread.start()
 
-def setspeed(spdlist):
+def setspeed(spdlist, comm):
 	global speedthread
 	oldspeedthread = speedthread
 	isspeedset = True
+	if len(comm) == 1:
+		if comm[0] == "gs":
+			ser.readline()
+			ser.write(("gs\n").encode('UTF-8'))
+			answer = ser.readline()
+			print(answer.decode('UTF-8').rstrip("\n"))
+	elif len(comm) == 2:
+		if comm[0] == "d:" or comm[0] == "sv:" or comm[0] == "rf:":
+			ser.readline()
+			ser.write((comm[0] + comm[1] + "\n").encode('UTF-8'))
 	while True:
 		ser.write(("sd:" + spdlist[1] + ":" + spdlist[2] + ":" + spdlist[3] + "\n").encode('UTF-8'))
 		fromserial = ser.readline()
@@ -40,7 +46,9 @@ def setspeed(spdlist):
 
 ser = serial.Serial("/dev/ttyACM0", timeout=2, write_timeout=2)
 speedthread = None
-	
+spdlist = ["sd", "0", "0", "0"]
+comm = []
+
 while True:
 	userc = input("Type command:")
 	if ser.in_waiting > 0:
