@@ -9,7 +9,7 @@ def communication(thread_queue):
 		if ser.in_waiting > 0:
 			inputbuff = ser.readline()
 			inputbuff = inputbuff.decode('UTF-8').rstrip("\n")
-			print(printbuff)
+			print(inputbuff)
 		try:
 			comm = thread_queue.get_nowait()
 			if comm == "gs":
@@ -39,8 +39,13 @@ def communication(thread_queue):
 				ser.write(speed.encode('UTF-8'))
 				answer = ser.readline()
 				print(answer.decode('UTF-8').rstrip("\n"))
-				ser.close()
-				break
+			elif comm == "exit":
+                                speed = "sd:0:0:0\n"
+                                ser.write(speed.encode('UTF-8'))
+                                answer = ser.readline()
+                                print(answer.decode('UTF-8').rstrip("\n"))
+                                ser.close()
+                                break
 		except queue.Empty:
 			pass
 		if speed != "sd:0:0:0\n":
@@ -57,6 +62,6 @@ mainboard_thread.start()
 while True:
 	userc = input("Type command:")
 	thread_queue.put_nowait(userc)
-	if userc == "stop":
-		time.sleep(5)
+	if userc == "exit":
+		time.sleep(1)
 		break
