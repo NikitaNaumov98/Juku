@@ -1,6 +1,7 @@
 import socket
 import json
 import threading
+import config
 
 command = "stop"
 basket = "color"

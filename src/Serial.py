@@ -17,3 +17,6 @@ class SerialClass():
         self.ser.write(str(speed3))
         self.ser.write(str(thrower_speed))
         self.ser.write(0xAAAA)
+        
+    
+    

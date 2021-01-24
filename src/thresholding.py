@@ -8,8 +8,8 @@ import time
 
 pipeline = rs.pipeline()
 configu = rs.config()
-configu.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 60)
-configu.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
+configu.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
+configu.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
 
 profile = pipeline.start(configu)
 sensor_dep = profile.get_device().query_sensors()[1]
@@ -92,8 +92,9 @@ def start():
         # Display filtered image
 
         image = cv2.bitwise_and(bgr,bgr, mask=mask)
-        thresholded = cv2.dilate(image, kernel, 1)
-        thresholded = cv2.erode(thresholded, kernel, 1)
+
+        mask = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+        thresholded = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         thresholded = cv2.bitwise_not(thresholded)
          
 
