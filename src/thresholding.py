@@ -98,9 +98,9 @@ def start():
         thresholded = cv2.bitwise_not(thresholded)
          
 
-        cv2.putText(image, fps, (5, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.imshow("frame", image)
-        cv2.imshow("threshold",thresholded)
+        #cv2.putText(image, fps, (5, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        #cv2.imshow("frame", image)
+        #cv2.imshow("threshold",thresholded)
 
         # Handle keyboard input
         key = cv2.waitKey(1)

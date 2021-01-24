@@ -5,17 +5,19 @@ import pyrealsense2 as rs
 import numpy as np
 import time
 from plot import *
+from TaskFile import *
 
-ball_co = []
-basket_co = []
-distance = []
+def take_sec(elem):
+    return elem[1]
 
-def image_processing():
+def choose_ball(balls):
+    balls.sort(key = take_sec)
+    return ball_co[0]
 
-    global balls_co
-    global basket_co
-    global distance
-        
+def image_processing(d):
+    global var_dict
+    img_dict = {}
+
     uusaeg = 0
 
 
@@ -31,7 +33,7 @@ def image_processing():
 
     while(True):
 
-       
+
 
         frames = pipeline.wait_for_frames()
         
@@ -67,37 +69,47 @@ def image_processing():
         ball_co, points = ball_detection(balls, detector)
         basket_co = basket_detection(basket)
         
-        
-        
+
+
         if(basket_co != None):
             middle = basket_co[0] + basket_co[2]/2
         else:
             middle = 0
             
-        
-        if(middle < 460 and middle > 420):
-            basket_d = basket_distance(depth, basket_co)
-        else:
-            basket_d = 0
+        ball = choose_ball(ball_co)
 
-        bgr = draw_basket(basket_co, bgr, basket_d)
+        img_dict["ball"] = ball
+
+        if(middle < 460 and middle > 420):
+            distance = basket_distance(depth_image, basket_co)
+
+        else:
+
+            distance = 0
+
+        bgr = draw_basket(basket_co, bgr, distance)
         bgr = draw_balls(ball_co, bgr, points)
 
-        if(basket_d != 0):
-            print(get_speed(basket_d))
+        if(distance != 0):
+            thrower_speed = get_speed(distance)
 
         cv2.putText(bgr, fps, (5, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        
+
         cv2.imshow("frame", bgr)
         cv2.imshow("depth", balls)
-        
-        key = cv2.waitKey(1)
 
-        if key & 0xFF == ord("q"):
+        change_vars(img_dict)
+
+        try:
+            key = cv2.waitKey(1)
+
+            if key & 0xFF == ord("q"):
+                break
+        except KeyboardInterrupt:
             break
 
     pipeline.stop()
     cv2.destroyAllWindows()
 
-if __name__ == "__main__":
-    image_processing()
+
+
