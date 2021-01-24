@@ -6,43 +6,24 @@ from controllermovement import *
 import sys
 sys.path.append('..')
 
-var_dict = {"s1":0,"s2":0,"s3":0,"t":0,"bal":0,"bask":0,"throw":False}
 
-def change_vars(new_list):
-    global var_dict
-    with lock:
-        for x in new_list:
-            var_dict[x] = new_list[x]
-    return var_dict
 
-def get_vars(the_dict):
-    global  var_dict
-    with lock:
-        for x in the_dict:
-            the_dict[x] = var_dict[x]
-    return the_dict
 
 if __name__ == "__main__":
-    roboserial = SerialClass("/dev/ttyACM0")
-    serialt = threading.Thread(target=roboserial, daemon=True)
-    imaget = threading.Thread(target=image_processing, daemon=True)
 
-
-    serialt.start()
-    imaget.start()
-
+    pipeline, align, detector = init_image()
+    ser = uue_serial()
 
     while(True):
-        print(var_dict)
-        var_dict["s1"] = 10
+        pall, korv = image_processing(pipeline, align, detector)
+        direction = calculate_movement_direction(pall[0],pall[1],420)
 
+        if(pall[1] > 700):
+            input("kaugel on" )
 
+        else:
+            speeds = [0,0,0,0]
+            speeds = omnimovement(speeds, 50, firstwheelangle, secondwheelangle, thirdwheelangel,direction)
 
-
-
-
- 
- 
-
-
+        send_speed(speeds,ser)
 

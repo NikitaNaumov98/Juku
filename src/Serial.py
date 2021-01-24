@@ -5,7 +5,6 @@ import serial.tools.list_ports
 import threading
 from TaskFile import *
 
-lock = threading.Lock()
 
 class SerialClass():
 
@@ -37,30 +36,45 @@ class SerialClass():
         self.ser.read(self.ser.inWaiting())
 
 
-def serial_thread():
-    global var_dict
+    def serial_thread(self):
+        global var_dict
+        while(True):
+            try:
+                ser_dict = {"s1":0,"s2":0,"s3":0,"t":0,"throw":False}
 
-    ser_dict = {}
+                ser_dict = get_vars(ser_dict)
 
-    set_dict = get_vars(ser_dict)
+                speeds = []
 
-    ser = SerialClass()
+                speeds.append(ser_dict["s1"])
+                speeds.append(ser_dict["s2"])
+                speeds.append(ser_dict["s3"])
 
-    speeds = []
-    speeds.append(ser_dict["s1"])
-    speeds.append(ser_dict["s2"])
-    speeds.append(ser_dict["s3"])
+                if(ser_dict["throw"]):
+                    speeds.append(ser_dict["t"])
+                else:
+                    speeds.append(0)
 
-    if(ser_dict["throw"]):
-        speeds.append(ser_dict["t"])
-    else:
-        speeds.append(0)
+                self.set_speeds(speeds)
 
-    ser.set_speeds(speeds)
-
-    ser.send_speed()
-    ser.read()
-
+                self.send_speed()
+                self.read()
+            except KeyboardInterrupt:
+                self.close()
 
 
+def uue_serial():
 
+    print(serial.tools.list_ports.comports())
+
+    ser = serial.Serial(port="/dev/ttyACM0", baudrate=115200)
+
+    return  ser
+
+
+
+
+def send_speed(speeds, ser):
+    package = pack('<hhhHH', speeds[0], speeds[1], speeds[2], speeds[3], 0xAAAA)
+    ser.write(package)
+    ser.read(ser.inWaiting())
