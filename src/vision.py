@@ -4,11 +4,6 @@ import numpy as np
 import pyrealsense2 as rs
 
 
-
-
-
-
-
 # TODO: display errors when configuration file is missing any of these values
 # Get color ranges and noise removal kernels from config
 ball_color_range = config.get("colors", config.get("vision", "ball_color"))
@@ -162,13 +157,11 @@ def basket_distance(depth_array,corners):
 
 def blur(bgr):
 
-
-
     blurval = ball_noise_kernel["b"]
 
     if (blurval % 2 == 0):
         blurval += 1
 
-    bgr = cv2.GaussianBlur(bgr, (blurval, blurval), 1)
+    bgr = cv2.blur(bgr, (blurval, blurval))
 
     return bgr

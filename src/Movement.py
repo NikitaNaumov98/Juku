@@ -17,8 +17,8 @@ turningspeed = 50
 
 def calculate_wheel_speed(overall_speed, direction, wheel_angle):
     linear_velocity = overall_speed * math.cos(direction - wheel_angle)
-
-    mainboardunits = 32767 / 100 * linear_velocity
+    print(linear_velocity)
+    mainboardunits = 32767 + 100 * linear_velocity
 
     return mainboardunits
 
@@ -61,11 +61,17 @@ def turn_around_ball(speeds):
 
     return speeds
 
-def omnimovement(speeds, movingspeed, angle1, angle2, angle3, direction ):
+def omnimovement( movingspeed, angle1, angle2, angle3, direction ):
+    speeds = [0,0,0,0]
     speeds[0] = int(calculate_wheel_speed(movingspeed, direction, angle1))
     speeds[1] = int(calculate_wheel_speed(movingspeed, direction, angle2))
     speeds[2] = int(calculate_wheel_speed(movingspeed, direction, angle3))
-    print(speeds)
+
 
     return speeds
+
+
+def movement(PallX,PallY,movingspeed):
+    direction = calculate_movement_direction(PallX,PallY,415)
+    omnimovement(movingspeed,0,120,240,direction)
 

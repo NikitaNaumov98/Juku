@@ -1,29 +1,38 @@
 from Movement import *
 from Serial import *
 from imageprocessing import *
-import threading
-from controllermovement import *
+from imageprocessing import Camera
+from multiprocessing import Process, Lock, Array, shared_memory
 import sys
+import cv2
 sys.path.append('..')
-
 
 
 
 if __name__ == "__main__":
 
-    pipeline, align, detector = init_image()
-    ser = uue_serial()
+
+    video = Camera().start()
+    pilt = video.cam
+    depth = video.depth
+    pildiprotsess = ImageProcessing(pilt,depth).start()
+    time.sleep(2)
+
 
     while(True):
-        pall, korv = image_processing(pipeline, align, detector)
-        direction = calculate_movement_direction(pall[0],pall[1],420)
+        pilt = video.cam
+        pildiprotsess.set_frame(pilt)
+        thower = pildiprotsess.thrower_speed
+        balls = pildiprotsess.ball_co
+        basket = pildiprotsess.basket_co
+        processed = pildiprotsess.balls
+        cv2.imshow("test",processed)
 
-        if(pall[1] > 700):
-            input("kaugel on" )
+        key = cv2.waitKey(1)
 
-        else:
-            speeds = [0,0,0,0]
-            speeds = omnimovement(speeds, 50, firstwheelangle, secondwheelangle, thirdwheelangel,direction)
+        if key & 0xFF == ord("q"):
+            break
 
-        send_speed(speeds,ser)
+
+        
 

@@ -8,17 +8,16 @@ import time
 
 pipeline = rs.pipeline()
 configu = rs.config()
-configu.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 60)
-configu.enable_stream(rs.stream.color, 848, 480, rs.format.bgr8, 60)
+configu.enable_stream(rs.stream.depth, 848, 480, rs.format.z16, 30)
+configu.enable_stream(rs.stream.color, 848, 480, rs.format.bgra8, 30)
 
 profile = pipeline.start(configu)
 sensor_dep = profile.get_device().query_sensors()[1]
 sensor_dep.set_option(rs.option.enable_auto_exposure, 0)
 sensor_dep.set_option(rs.option.enable_auto_white_balance, 0)
-sensor_dep.set_option(rs.option.exposure, 80)
+sensor_dep.set_option(rs.option.exposure, 100)
 sensor_dep.set_option(rs.option.brightness, 1)
 print(sensor_dep.get_option(rs.option.brightness))
-
 
 def start():
     # Ask for color name to threshold
@@ -58,7 +57,12 @@ def start():
         # Read BGR frame
 #        _, bgr = cap.read()
         frames = pipeline.wait_for_frames()
-        bgr = frames.get_color_frame()
+        depth_frame = frames.get_depth_frame()
+        color_frame = frames.get_color_frame()
+        
+        if not depth_frame  or not color_frame:
+            continue
+
         dilationval = threshold_range["d"]
         
         if(dilationval%2 == 0):
@@ -71,16 +75,13 @@ def start():
 
         kernel = np.ones((dilationval,dilationval),np.uint8)
 
-        if not bgr:
-            print("not")
-            continue
 
         aeg = time.time()
         fps = str(1//(aeg-uusaeg))
         uusaeg = time.time()
 
         # Convert to HSV
-        bgr = np.asanyarray(bgr.get_data())
+        bgr = np.asanyarray(color_frame.get_data())
         bgr = cv2.rotate(bgr,cv2.ROTATE_180)
         bgr = cv2.GaussianBlur(bgr, (blurval,blurval),1)
         hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
@@ -96,11 +97,11 @@ def start():
         mask = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
         thresholded = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         thresholded = cv2.bitwise_not(thresholded)
-         
 
-        #cv2.putText(image, fps, (5, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        #cv2.imshow("frame", image)
-        #cv2.imshow("threshold",thresholded)
+
+        cv2.putText(image, fps, (5, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.imshow("frame", image)
+        cv2.imshow("threshold",thresholded)
 
         # Handle keyboard input
         key = cv2.waitKey(1)
@@ -118,6 +119,6 @@ def start():
     pipeline.stop()
     cv2.destroyAllWindows()
 
-
 if __name__ == "__main__":
     start()
+
