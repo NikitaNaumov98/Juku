@@ -9,25 +9,27 @@ from TaskFile import *
 class SerialClass:
 
     def __init__(self, port):
-        self.ser = serial.Serial(port, baudrate = 115200, timeout = 0.2, write_timeout=1)
+        self.ser = serial.Serial(port, baudrate = 115200, timeout = 2, write_timeout = 2)
         self.speeds = [0, 0, 0, 0]
         self.drive = False
         self.throw = False
+        self.running = True
 
     def start(self):
-        Thread(target=self.send_speed(),args=()).start()
+        Thread(target=self.send_speed,args=()).start()
         return self
 
     def send_speed(self):
-
         package = pack('<hhhHH', self.speeds[0], self.speeds[1], self.speeds[2], self.speeds[3], 0xAAAA)
         self.ser.write(package)
-        self.ser.read(self.ser.inWaiting())
+#            time.sleep(0.5)
+#            vastus = self.ser.read(self.ser.inWaiting()
 
     def open(self):
         self.ser.open()
 
     def close(self):
+        self.running = False
         self.ser.close()
 
     def get_speeds(self):
