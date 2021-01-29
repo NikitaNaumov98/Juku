@@ -10,6 +10,7 @@ They are saved into config.ini.
 
 Image processing and capturing functions are at the end of the imageprocessing.py file.
 
+ball and basket filtering commands are in the vision.py file. And also realsense configuration is there.
 
 
 
